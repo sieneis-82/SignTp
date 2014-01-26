@@ -138,4 +138,4 @@ class SignTp implements Plugin{
 		}
 	}
 	public function reConfig(){$this->point = $this->api->plugin->readYAML($this->api->plugin->configPath($this)."point.yml");}
-}
+} 
