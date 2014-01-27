@@ -4,7 +4,7 @@
 __PocketMine Plugin__
 name=SignTp
 description=
-version=0.0.2
+version=0.0.3
 author=DreamWork Studio
 class=SignTp
 apiversion=11
@@ -12,7 +12,7 @@ apiversion=11
 
 class SignTp implements Plugin{
     private $api;
-	private $version = "0.0.2";
+	private $version = "0.0.3";
 	private $lang, $langFile, $point, $pointFile;
 	private $prefix = "[SignTp]";
 	public function __construct(ServerAPI $api, $server = false){
@@ -95,23 +95,30 @@ class SignTp implements Plugin{
 		console($this->prefix." Loading base commands...");
 		$this->api->console->register("st", $this->lang["help"]["command-st-description"], array($this, "command"));
 		console($this->prefix." Loading events...");
+		$this->api->addHandler("tile.update", array($this, "eventHandler"));
 		$this->api->addHandler("player.block.touch", array($this, "eventHandler"));
 		console($this->prefix." Version ".$this->version." successful loaded!");
 	}
 	public function __destruct(){}
 	public function eventHandler(&$data, $event){
 		switch($event){
+			case "tile.update":
+				if(!($data->class == TILE_SIGN)) break;
+				if(!($data->data['Text1'] == "[SignTp]")) break;
+				$this->api->player->get($data->data['creator'])->sendChat(
+					str_replace(
+					array("%1"),
+					array($this->lang["prefix"]),
+					$this->lang["message"]["Sign-place"]));break;
 			case "player.block.touch":
 				$tile = $this->api->tile->get(new Position($data['target']->x, $data['target']->y, $data['target']->z, $data['target']->level));
 				if($tile === false) break;
 				if(!($tile->class == TILE_SIGN)) break;
+				if(!($tile->data['Text1'] == "[SignTp]")) break;
 				switch($data['type']){
-					case "place":
-						$data['player']->sendChat(str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["message"]["Sign-place"]));
 					case "break":
-						$data['player']->sendChat(str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["message"]["Sign-break"]));
-					default:
-						if(!($tile->data['Text1'] == "[SignTp]")) break;
+						$data['player']->sendChat(str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["message"]["Sign-break"]));break;
+					case "place":
 						if($tile->data['Text2'] == ""){$data['player']->sendChat(str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["err"]["Empty-name"]));break;}
 						if(!(isset($this->point[$tile->data['Text2']]))){$data['player']->sendChat(str_replace(array("%1","%n"),array($this->lang["prefix"],$tile->data['Text2']),$this->lang["err"]["Not-Found"]));break;}
 						$target = $this->point[$tile->data['Text2']];
@@ -119,6 +126,7 @@ class SignTp implements Plugin{
 						if(!($target["level"] == $data['player']->level->getName())){$data['player']->teleport($this->api->level->get($target["level"])->getSpawn());}
 						$this->api->player->tppos($name, $target["x"], $target["y"], $target["z"]);
 						$data['player']->sendChat(str_replace(array("%1","%n"),array($this->lang["prefix"],$tile->data['Text2']),$this->lang["message"]["Tp-complete"]));
+						break;
 				}
 		}
 	}
