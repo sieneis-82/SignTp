@@ -105,11 +105,7 @@ class SignTp implements Plugin{
 			case "tile.update":
 				if(!($data->class == TILE_SIGN)) break;
 				if(!($data->data['Text1'] == "[SignTp]")) break;
-				$this->api->player->get($data->data['creator'])->sendChat(
-					str_replace(
-					array("%1"),
-					array($this->lang["prefix"]),
-					$this->lang["message"]["Sign-place"]));break;
+				$this->api->player->get($data->data['creator'])->sendChat(str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["message"]["Sign-place"]));break;
 			case "player.block.touch":
 				$tile = $this->api->tile->get(new Position($data['target']->x, $data['target']->y, $data['target']->z, $data['target']->level));
 				if($tile === false) break;
