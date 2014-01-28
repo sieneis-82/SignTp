@@ -4,7 +4,7 @@
 __PocketMine Plugin__
 name=SignTp
 description=
-version=0.1.0
+version=0.1.1
 author=DreamWork Studio
 class=SignTp
 apiversion=11
@@ -12,11 +12,12 @@ apiversion=11
 
 class SignTp implements Plugin{
     private $api;
-	private $version = "0.1.0";
+	private $version;
 	private $lang, $langFile, $point, $pointFile;
 	private $prefix = "[SignTp]";
 	public function __construct(ServerAPI $api, $server = false){
 		$this->api = $api;
+		$this->version = "0.1.1";
 		console($this->prefix." Loading plugin version ".$this->version."...");
 	}
 	public function init(){
@@ -33,6 +34,7 @@ class SignTp implements Plugin{
 								  "> /st signhelp : Get help of creating tpsigns.\n".
 								  "> /st tp <PointName> [PlayerName] : Tp player to a point.\n".
 								  "> /st reconfig : Reload point config.\n".
+								  "> /st checkupd : Check the update. Only work if you're console.\n".
 							      "> /st ?|help [cmdname] : Get help of this plugin or a command.\n".
 							      ">>> Plugin by DreamWork <<<",
 				"sign-help" => ">>> SignTp sign help <<<\n".
@@ -83,6 +85,10 @@ class SignTp implements Plugin{
 								   "> Usage: /st reconfig\n".
 								   "> Reload point data.\n".
 								   ">>> Plugin by DreamWork <<<",	
+				"help-checkupd" => ">>> SignTp command help <<<\n".
+								   "> Usage: /st checkupd\n".
+								   "> Check the update. Only work if you're console.\n".
+								   ">>> Plugin by DreamWork <<<",	
 			),
 			"message" => array(
 				"version" => "%1 Plugin version : %v",
@@ -98,14 +104,19 @@ class SignTp implements Plugin{
 				"point-list-end" => ">>> Plugin by DreamWork <<<",
 				"reconfig-ing" => "%1 Reconfiging...",
 				"reconfig-done" => "%1 Reconfig Done.",
+				"checkupd-ing" => "%1 Checking update...",
+				"checkupd-result" => "%1 Server verion : %s , Your version : %v .",
+				"checkupd-dl" => "%1 Not the newest version! Visit %u to download.",
 			),
 			"err" => array(
+				"console-only" => "%1 This command is only for console to use!",
 				"Unknown-subcmd" => "%1 Unknown subcommand. Type '/st help' for help.",
 				"Empty-name" => "%1 Point's name is empty!",
 				"Already-Found" => "%1 Point '%n' already found! Try another name.",
 				"Not-Found" => "%1 Point '%n' not found!",
 				"Console-create-err" => "%1 Console usage:'/st create <PointName> <x> <y> <z> <world>'.",
 				"Console-tp-err" => "%1 Console usage:'/st near <PointName> <PlayerName>'.",
+				"checkupd-connect-err" => "%1[ERROR] Cannot connect to the server!",
 			),
 		));
 		$this->lang = $this->api->plugin->readYAML($this->api->plugin->configPath($this)."lang.yml");
@@ -164,6 +175,7 @@ class SignTp implements Plugin{
 							case "i":case "info":return($this->lang["help"]["help-info"]);break;
 							case "tp":return($this->lang["help"]["help-tp"]);break;
 							case "reconfig":return($this->lang["help"]["help-reconfig"]);break;
+							case "checkupd":return($this->lang["help"]["help-checkupd"]);break;
 						}
 					case "signhelp":return($this->lang["help"]["sign-help"]);break;
 					case "reconfig":
@@ -229,8 +241,45 @@ class SignTp implements Plugin{
 						if($issuer instanceof Player){console(str_replace(array("%1","%n","%p"),array($this->lang["prefix"],$params[1],$issuer->iusername),$this->lang["message"]["Delete-complete-console"]));};
 						return(str_replace(array("%1","%n"),array($this->lang["prefix"],$params[1]),$this->lang["message"]["Delete-complete"]));
 						break;
+					case "checkupd":
+						if($issuer instanceof Player){return str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["err"]["console-only"]);}
+						console(str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["message"]["checkupd-ing"]));
+						$upd = $this->checkUpd();
+						if($upd[0] == "error"){
+							console("[ERROR] ".$upd[1]);
+						}else{
+							console(str_replace(array("%1","%s","%v"),array($this->lang["prefix"],$upd[0],$this->version),$this->lang["message"]["checkupd-result"]));
+							if($this->compareVer($this->version, $upd[0]) == "2"){
+								console(str_replace(array("%1","%u"),array($this->lang["prefix"],str_replace(array("#"),array(""),$upd[1])),$this->lang["message"]["checkupd-dl"]));
+							}
+						}
+						break;
 				}
 		}
 	}
 	public function reConfig(){$this->point = $this->api->plugin->readYAML($this->api->plugin->configPath($this)."point.yml");}
+	public function checkUpd(){
+		$i = file_get_contents("http://www.mcbbs.net/thread-226762-1-1.html");
+		if(strpos($i,"####")){
+			$o = explode("####",$i);
+			return array($o[1], $o[2]);
+		}else{
+			return array("error",str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["err"]["checkupd-connect-err"]));
+		}
+	}
+	public function compareVer($ver1, $ver2){
+		$ver1e = explode(".",$ver1);
+		$ver2e = explode(".",$ver2);
+		if((double)$ver1e[1]<(double)$ver2e[1]){
+			return "2";
+		}elseif((double)$ver1e[2]<(double)$ver2e[2]){
+			return "2";
+		}elseif((double)$ver1e[3]<(double)$ver2e[3]){
+			return "2";
+		}elseif((double)$ver1e[3]=(double)$ver2e[3]){
+			return "0";
+		}else{
+			return "1";
+		}
+	}
 }
