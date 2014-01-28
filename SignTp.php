@@ -30,9 +30,9 @@ class SignTp implements Plugin{
 								  "> /st d|delete <PointName> : Delete a point.\n".
 								  "> /st l|list : List all points.\n".
 							      "> /st version : Get plugin version.\n".
-								  "> /st signhelp : Get help of creating tpsigns.".
-								  "> /st tp <PointName> [PlayerName] : Tp player to a point.".
-								  "> /st reconfig : Reload point config.".
+								  "> /st signhelp : Get help of creating tpsigns.\n".
+								  "> /st tp <PointName> [PlayerName] : Tp player to a point.\n".
+								  "> /st reconfig : Reload point config.\n".
 							      "> /st ?|help [cmdname] : Get help of this plugin or a command.\n".
 							      ">>> Plugin by DreamWork <<<",
 				"sign-help" => ">>> SignTp sign help <<<\n".
