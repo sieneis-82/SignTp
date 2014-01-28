@@ -4,7 +4,7 @@
 __PocketMine Plugin__
 name=SignTp
 description=
-version=0.0.3
+version=0.1.0
 author=DreamWork Studio
 class=SignTp
 apiversion=11
@@ -12,7 +12,7 @@ apiversion=11
 
 class SignTp implements Plugin{
     private $api;
-	private $version = "0.0.3";
+	private $version = "0.1.0";
 	private $lang, $langFile, $point, $pointFile;
 	private $prefix = "[SignTp]";
 	public function __construct(ServerAPI $api, $server = false){
@@ -28,8 +28,11 @@ class SignTp implements Plugin{
 				"command-help" => ">>> SignTp command help <<<\n".
 							      "> /st c|create <PointName> [<x> <y> <z> <world>] : Create a point.\n".
 								  "> /st d|delete <PointName> : Delete a point.\n".
+								  "> /st l|list : List all points.\n".
 							      "> /st version : Get plugin version.\n".
 								  "> /st signhelp : Get help of creating tpsigns.".
+								  "> /st tp <PointName> [PlayerName] : Tp player to a point.".
+								  "> /st reconfig : Reload point config.".
 							      "> /st ?|help [cmdname] : Get help of this plugin or a command.\n".
 							      ">>> Plugin by DreamWork <<<",
 				"sign-help" => ">>> SignTp sign help <<<\n".
@@ -54,13 +57,32 @@ class SignTp implements Plugin{
 								  "> Usage: /st create|c <PointName> [<x> <y> <z> <world>]\n".
 								  "> Create a point.\n".
 								  "> <PointName>: The target point's name.\n".
-								  "> [<x> <y> <z> <world>]: The target's location. You have to type if you're console.\n".
+								  "> [<x> <y> <z> <world>]: The target's location. Unoptional if you're console.\n".
 								  ">>> Plugin by DreamWork <<<",
 				"help-delete" => ">>> SignTp command help <<<\n".
 								  "> Usage: /st delete|d <PointName> [<x> <y> <z> <world>]\n".
 								  "> Delete a point.\n".
 								  "> <PointName> : The name of the point you'd like to delete.\n".
 								  ">>> Plugin by DreamWork <<<",
+				"help-list" => ">>> SignTp command help <<<\n".
+							   "> Usage: /st l|list \n".
+							   "> List all points.\n".
+							   ">>> Plugin by DreamWork <<<",
+				"help-info" => ">>> SignTp command help <<<\n".
+							   "> Usage: /st i|info <PointName> \n".
+							   "> See info of a point.\n".
+							   "> <PointName> : Name of the point.\n".
+							   ">>> Plugin by DreamWork <<<",
+				"help-tp" => ">>> SignTp command help <<<\n".
+							 "> Usage: /st tp <PointName> [PlayerName]\n".
+							 "> Teleport player to a point.\n".
+							 "> <PointName> :　Target point's name.\n".
+							 "> [PlayerName] : Optional. Leave empty for your name.\n".
+							 ">>> Plugin by DreamWork <<<",
+				"help-reconfig" => ">>> SignTp command help <<<\n".
+								   "> Usage: /st reconfig\n".
+								   "> Reload point data.\n".
+								   ">>> Plugin by DreamWork <<<",	
 			),
 			"message" => array(
 				"version" => "%1 Plugin version : %v",
@@ -71,26 +93,24 @@ class SignTp implements Plugin{
 				"Sign-break" => "%1 Sign broke.",
 				"Create-complete-console" => "%1 Point '%n' has been CREATED by player %p.",
 				"Delete-complete-console" => "%1 Point '%n' has been DELETED by player %p.",
+				"point-info" => "%1 Point '%n' x:%x y:%y z:%z w:%w.",
+				"point-list-begin" => ">>> List of points <<<",
+				"point-list-end" => ">>> Plugin by DreamWork <<<",
+				"reconfig-ing" => "%1 Reconfiging...",
+				"reconfig-done" => "%1 Reconfig Done.",
 			),
 			"err" => array(
-				"Unknown-subcmd" => "%1 Unknown subcommand. Type '/st ?' or '/st help' for help.",
+				"Unknown-subcmd" => "%1 Unknown subcommand. Type '/st help' for help.",
 				"Empty-name" => "%1 Point's name is empty!",
 				"Already-Found" => "%1 Point '%n' already found! Try another name.",
 				"Not-Found" => "%1 Point '%n' not found!",
-				"Console-create-err" => "%1 Usage:'/st create <PointName> <x> <y> <z> <world>'.",
+				"Console-create-err" => "%1 Console usage:'/st create <PointName> <x> <y> <z> <world>'.",
+				"Console-tp-err" => "%1 Console usage:'/st near <PointName> <PlayerName>'.",
 			),
 		));
 		$this->lang = $this->api->plugin->readYAML($this->api->plugin->configPath($this)."lang.yml");
 		console($this->prefix." Loading points...");
 		$this->pointFile = new Config($this->api->plugin->configPath($this)."point.yml", CONFIG_YAML, array());
-		/*
-		"name" => array(
-			"x" => x,
-			"y" => y,
-			"z" => z,
-			"level" => level,
-		),
-		*/
 		$this->reConfig();
 		console($this->prefix." Loading base commands...");
 		$this->api->console->register("st", $this->lang["help"]["command-st-description"], array($this, "command"));
@@ -140,8 +160,40 @@ class SignTp implements Plugin{
 							case "signhelp":return($this->lang["help"]["help-signhelp"]);break;
 							case "c":case "create":return($this->lang["help"]["help-create"]);break;
 							case "d":case "delete":return($this->lang["help"]["help-delete"]);break;
+							case "l":case "list":return($this->lang["help"]["help-list"]);break;
+							case "i":case "info":return($this->lang["help"]["help-info"]);break;
+							case "tp":return($this->lang["help"]["help-tp"]);break;
+							case "reconfig":return($this->lang["help"]["help-reconfig"]);break;
 						}
 					case "signhelp":return($this->lang["help"]["sign-help"]);break;
+					case "reconfig":
+						if($issuer instanceof Player){$issuer->sendChat(str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["message"]["reconfig-ing"]));}
+						console(str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["message"]["reconfig-ing"]));
+						$this->reConfig();
+						if($issuer instanceof Player){$issuer->sendChat(str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["message"]["reconfig-done"]));}
+						console(str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["message"]["reconfig-done"]));
+						break;
+					case "tp":
+						if($params[1] == ""){return(str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["err"]["Empty-name"]));break;}
+						if(!isset($this->point[$params[1]])){return(str_replace(array("%1","%n"),array($this->lang["prefix"],$params[1]),$this->lang["err"]["Not-Found"]));break;}
+						if(isset($params[2])){$name = $params[2];}else{$name = $issuer->iusername;}
+						$target = $this->point[$params[1]];
+						$this->api->player->tppos($name, $target["x"], $target["y"], $target["z"]);
+						return str_replace(array("%1","%n"),array($this->lang["prefix"],$tile->data['Text2']),$this->lang["message"]["Tp-complete"]);
+						break;
+					case "l":case "list":
+						$o = $this->lang["message"]["point-list-begin"] . "\n";
+						foreach($this->point as $n => $i){
+							$o .= str_replace(array("%1","%n","%x","%y","%z","%w"),array(">",$n,$i["x"],$i["y"],$i["z"],$i["level"]),$this->lang["message"]["point-info"]);
+							$o .= "\n";
+						}
+						$o .= $this->lang["message"]["point-list-end"];
+						return $o;
+						break;
+					case "i":case "info":
+						if($params[1] == ""){return(str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["err"]["Empty-name"]));break;}
+						if(!isset($this->point[$params[1]])){return(str_replace(array("%1","%n"),array($this->lang["prefix"],$params[1]),$this->lang["err"]["Not-Found"]));break;}
+						return str_replace(array("%1","%n","%x","%y","%z","%w"),array($this->lang["prefix"],$params[1],$this->point[$params[1]]["x"],$this->point[$params[1]]["y"],$this->point[$params[1]]["z"],$this->point[$params[1]]["level"]),$this->lang["message"]["point-info"]);
 					case "create":case "c":
 						if($params[1] == ""){return(str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["err"]["Empty-name"]));break;}
 						if(isset($this->point[$params[1]])){return(str_replace(array("%1","%n"),array($this->lang["prefix"],$params[1]),$this->lang["err"]["Already-Found"]));break;}
