@@ -20,3 +20,15 @@ A PocketMine plugin that let you place a sign to teleport.
 | /st l/list | None | List all points |
 | /st i/info | `<PointName>` | Show information of `<PointName>` |
 | /st tp | `<PointName>` `[PlayerName]` | Teleport `[PlayerName]`(blank for yourself) to `<PointName>` |
+
+# Console commands
+
+| Command | Parameter | Description |
+| :-----: | :-------: | :---------: |
+| /st reconfig | None | Reload the point data from /SignTp/point.yml |
+| /st checkupd | None | Check update from server. |
+
+# Tips
+
+/plugins/SignTp/point.yml : Yaml of points.
+/plugins/SignTp/lang.yml : Language confit.
