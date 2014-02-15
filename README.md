@@ -5,7 +5,7 @@ A PocketMine plugin that let you place a sign to teleport.
 
 # Installation
 
-0.!!Install Falk's SimpleWarp first!! Download it at http://forums.pocketmine.net/plugins/simplewarp.178/ .
+0.  !!Install Falk's SimpleWarp first!! Download it at http://forums.pocketmine.net/plugins/simplewarp.178/ .
 1.  Drop this two plugins into your /plugins folder.
 2.  Restart your server.
 
@@ -30,10 +30,10 @@ A PocketMine plugin that let you place a sign to teleport.
 
 # Others
 
-Wiki page: https://github.com/sieneis-82/SignTp/wiki  .
-BUG Report: http://found.dw.cn/42.php  .
+Wiki page:  https://github.com/sieneis-82/SignTp/wiki  .
+BUG Report:  http://found.dw.cn/42.php  .
 
-Our website: http://www.dw.cn
+Our website:  http://www.dw.cn
 
 Copyright 2007-2014 DreamWork Studio.
 
