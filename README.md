@@ -5,33 +5,28 @@ A PocketMine plugin that let you place a sign to teleport.
 
 # Installation
 
-1.  Drop it into your /plugins folder.
+0.!!Install Falk's SimpleWarp first!! Download it at http://forums.pocketmine.net/plugins/simplewarp.178/
+1.  Drop this two plugins into your /plugins folder.
 2.  Restart your server.
 
-# Commands
+# Commands (For all users)
 
 | Command | Parameter | Description |
 | :-----: | :-------: | :---------: |
 | /st help/?| `[commandName]` | Show help (of `[commandName]`) |
 | /st version | None | Show plugin version |
 | /st signhelp | None | Show help of creating tpsigns |
-| /st c/create | `<PointName>` [`<x>` `<y>` `<z>` `<world>`] | Create a point. Leave blank location for your own location |
-| /st d/delete | `<PointName>` | Delete a point |
-| /st l/list | None | List all points |
-| /st i/info | `<PointName>` | Show information of `<PointName>` |
-| /st tp | `<PointName>` `[PlayerName]` | Teleport `[PlayerName]`(blank for yourself) to `<PointName>` |
 
 # Console commands
 
 | Command | Parameter | Description |
 | :-----: | :-------: | :---------: |
-| /st reconfig | None | Reload the point data from /SignTp/point.yml |
+| /st reconfig | None | Reload the point data from /SimpleWarp/warps.yml |
 | /st checkupd | None | Check update from server. |
 
 # Tips
 
-/plugins/SignTp/point.yml : Yaml of points.
-/plugins/SignTp/lang.yml : Language confit.
+/plugins/SignTp/lang.yml : Language config.
 
 # Others
 
