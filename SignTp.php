@@ -73,6 +73,7 @@ class SignTp implements Plugin{
 					"checkupd-ing" => "%1 Checking update...",
 					"checkupd-result" => "%1 Server verion : %s , Your version : %v .",
 					"checkupd-dl" => "%1 Not the newest version! Visit %u to download.",
+					"Tp-complete" => "%1 You are teleported to point '%n'.",
 				),
 				"err" => array(
 					"console-only" => "%1 This command is only for console to use!",
@@ -112,8 +113,8 @@ class SignTp implements Plugin{
 						$this->reConfig();
 						if($tile->data['Text2'] == ""){$data['player']->sendChat(str_replace(array("%1"),array($this->lang["prefix"]),$this->lang["err"]["Empty-name"]));break;}
 						$name = $data['player']->username;
-						if(substr($tile->data['Text2'],1,2) == "w:"){
-							$target = substr($tile->data['Text2'],3);
+						if(substr($tile->data['Text2'],0,1) == "w:"){
+							$target = substr($tile->data['Text2'],2);
 							$data['player']->teleport($this->api->level->get($target)->getSpawn());
 						}else{
 							if(!(isset($this->point[$tile->data['Text2']]))){$data['player']->sendChat(str_replace(array("%1","%n"),array($this->lang["prefix"],$tile->data['Text2']),$this->lang["err"]["Not-Found"]));break;}
